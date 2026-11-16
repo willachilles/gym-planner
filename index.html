@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
     --bg: #0c0c0e;
@@ -19,6 +20,7 @@
     --text-dim: #9a9aa0;
     --rest: #ffb648;
     --steel: #3a3a40;
+    --gold: #ffd54a;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -39,6 +41,7 @@
     text-align: center;
   }
   .screen.active { display: flex; }
+  .screen.wide { justify-content: flex-start; padding-top: 40px; }
 
   h1 {
     font-family: 'Bebas Neue', 'Oswald', sans-serif;
@@ -49,6 +52,15 @@
     color: var(--text);
   }
   h1 .accent { color: var(--accent); }
+
+  .site-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
 
   p.sub {
     color: var(--text-dim);
@@ -71,9 +83,19 @@
     margin-bottom: 16px;
     text-align: center;
   }
-  input:focus {
-    outline: none;
-    border-color: var(--accent);
+  input:focus { outline: none; border-color: var(--accent); }
+
+  select {
+    width: 100%;
+    max-width: 320px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid var(--steel);
+    background: var(--card);
+    color: var(--text);
+    margin-bottom: 16px;
   }
 
   button {
@@ -131,7 +153,7 @@
   }
   .recommend-banner .value { font-size: 20px; font-weight: 700; }
 
-  .day-list { width: 100%; max-width: 320px; }
+  .day-list, .settings-list { width: 100%; max-width: 320px; }
   .day-btn {
     display: block;
     width: 100%;
@@ -167,6 +189,8 @@
     cursor: pointer;
   }
 
+  .home-menu { width: 100%; max-width: 320px; margin-top: 10px; }
+
   .progress-tag {
     font-size: 13px;
     letter-spacing: 2px;
@@ -194,6 +218,25 @@
     color: var(--text-dim);
     margin-bottom: 8px;
   }
+  .pr-best {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: -10px;
+    margin-bottom: 16px;
+  }
+  .pr-badge {
+    display: none;
+    background: var(--gold);
+    color: #241a00;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .pr-badge.show { display: inline-block; }
 
   .set-tag {
     font-size: 16px;
@@ -217,12 +260,7 @@
     margin-bottom: 4px;
     font-variant-numeric: tabular-nums;
   }
-  .timer-label {
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 30px;
-  }
+  .timer-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
   .timer-ring {
     width: 220px;
     height: 220px;
@@ -235,10 +273,7 @@
     margin-bottom: 30px;
     transition: border-color 0.3s, background 0.3s;
   }
-  .timer-ring.done {
-    border-color: var(--accent);
-    background: radial-gradient(circle, rgba(255,75,43,0.25), transparent);
-  }
+  .timer-ring.done { border-color: var(--accent); background: radial-gradient(circle, rgba(255,75,43,0.25), transparent); }
   @keyframes blink-bg {
     0%, 100% { border-color: var(--steel); }
     50% { border-color: var(--accent); background: rgba(255,75,43,0.25); }
@@ -247,13 +282,50 @@
 
   .complete-emoji { font-size: 56px; margin-bottom: 10px; }
 
-  .notif-note {
-    font-size: 12px;
-    color: var(--text-dim);
-    max-width: 300px;
-    margin-top: -4px;
+  .notif-note { font-size: 12px; color: var(--text-dim); max-width: 300px; margin-top: -4px; margin-bottom: 20px; }
+
+  /* History screen */
+  .chart-card {
+    background: var(--card);
+    border: 2px solid var(--steel);
+    border-radius: 14px;
+    padding: 16px;
+    width: 100%;
+    max-width: 340px;
     margin-bottom: 20px;
   }
+  .session-list { width: 100%; max-width: 340px; text-align: left; }
+  .session-item {
+    background: var(--card);
+    border: 2px solid var(--steel);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .session-item .sdate {
+    font-size: 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .session-item .sday { font-size: 15px; font-weight: 600; margin: 2px 0 6px; }
+  .session-item .sentry { font-size: 13px; color: var(--text-dim); }
+  .empty-note { color: var(--text-dim); font-size: 14px; max-width: 300px; margin-bottom: 20px; }
+
+  /* Settings screen */
+  .setting-row {
+    background: var(--card);
+    border: 2px solid var(--steel);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 320px;
+    text-align: left;
+  }
+  .setting-row .srow-name { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .setting-row select { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -266,9 +338,20 @@
     <button onclick="saveUsername()">Continue</button>
   </div>
 
-  <!-- Screen 2: main / day picker -->
+  <!-- Screen 2: home -->
+  <div class="screen" id="screen-home">
+    <div class="site-title">🏋️ Gym Planner</div>
+    <h1 id="home-greeting">Hello<span class="accent">!</span></h1>
+    <div class="home-menu">
+      <button onclick="showScreen('screen-main'); loadMainScreen()">Start Workout</button>
+      <button class="secondary" onclick="openHistory()">📈 Workout History</button>
+      <button class="secondary" onclick="openSettings()">⚙️ My Schedule</button>
+    </div>
+    <div class="back-link" onclick="resetUser()">Not you? Change name</div>
+  </div>
+
+  <!-- Screen 3: day picker -->
   <div class="screen" id="screen-main">
-    <h1 id="greeting">Hello<span class="accent">!</span></h1>
     <p class="sub">What are we working on today?</p>
 
     <div class="recommend-banner" id="recommend-banner">
@@ -278,33 +361,38 @@
 
     <div class="day-list" id="day-list"></div>
 
-    <div class="back-link" onclick="resetUser()">Not you? Change name</div>
+    <div class="back-link" onclick="showScreen('screen-home')">← Back to home</div>
   </div>
 
-  <!-- Screen 3: exercise overview -->
+  <!-- Screen 4: exercise overview -->
   <div class="screen" id="screen-exercise">
     <div class="progress-tag" id="ex-progress">Exercise 1 of 5</div>
     <div class="exercise-name" id="ex-name">Exercise</div>
     <div class="exercise-meta" id="ex-meta">4 sets of 6–8 reps</div>
 
+    <div class="pr-badge" id="pr-badge">🏆 New PR!</div>
+
     <label class="weight-label" for="ex-weight">Weight (kg) — leave blank if bodyweight</label>
-    <input type="number" id="ex-weight" placeholder="e.g. 60" inputmode="decimal">
+    <input type="number" id="ex-weight" placeholder="e.g. 60" inputmode="decimal" oninput="checkPrLive()">
+    <div class="pr-best" id="pr-best"></div>
 
     <button onclick="startExercise()">Start</button>
     <button class="howto" onclick="lookHowTo()">❓ I don't know how to do this</button>
     <div class="back-link" onclick="showScreen('screen-main')">← Back to day picker</div>
   </div>
 
-  <!-- Screen 4: active set -->
+  <!-- Screen 5: active set -->
   <div class="screen" id="screen-active">
     <div class="set-tag" id="active-settag">Set 1 of 4</div>
     <div class="instruction" id="active-instruction">Do 6–8 reps</div>
     <div class="exercise-meta" id="active-weight"></div>
     <button onclick="finishSet()">Done with this set</button>
     <button class="howto" onclick="lookHowTo()">❓ I don't know how to do this</button>
+    <div class="back-link" onclick="goToNextExercise()">Skip to next exercise →</div>
+    <div class="back-link" onclick="showExerciseOverview()">← Back</div>
   </div>
 
-  <!-- Screen 5: resting -->
+  <!-- Screen 6: resting -->
   <div class="screen" id="screen-resting">
     <div class="timer-label">Rest</div>
     <div class="timer-ring" id="timer-ring">
@@ -315,19 +403,44 @@
     <button id="rest-next-btn" style="display:none" onclick="afterRest()">Next</button>
   </div>
 
-  <!-- Screen 6: day complete -->
+  <!-- Screen 7: day complete -->
   <div class="screen" id="screen-complete">
     <div class="complete-emoji">🔥💪</div>
     <h1>Workout <span class="accent">Done!</span></h1>
     <p class="sub" id="complete-sub">Nice work.</p>
-    <button onclick="showScreen('screen-main')">Back to day picker</button>
+    <button onclick="openHistory()">📈 See Progress</button>
+    <button class="secondary" onclick="showScreen('screen-home')">Back to home</button>
+  </div>
+
+  <!-- Screen 8: workout history -->
+  <div class="screen wide" id="screen-history">
+    <h1>Your <span class="accent">Progress</span></h1>
+    <select id="history-exercise-select" onchange="renderHistoryChart()"></select>
+
+    <div class="chart-card">
+      <canvas id="history-chart" height="220"></canvas>
+    </div>
+
+    <div id="history-empty" class="empty-note" style="display:none">No logged weights for this exercise yet — do a session and enter a weight to start tracking it.</div>
+
+    <div class="session-list" id="session-list"></div>
+
+    <div class="back-link" onclick="showScreen('screen-home')">← Back to home</div>
+  </div>
+
+  <!-- Screen 9: settings -->
+  <div class="screen" id="screen-settings">
+    <h1>My <span class="accent">Schedule</span></h1>
+    <p class="sub">Which day of the week is each workout?</p>
+    <div class="settings-list" id="settings-list"></div>
+    <div class="back-link" onclick="showScreen('screen-home')">← Back to home</div>
   </div>
 
 <script>
   // Sunday = 0 ... Saturday = 6
   const WORKOUT_DAYS = [
     {
-      id: 1, name: "Lower Body Power & Core", weekday: 0, weekdayName: "Sunday",
+      id: 1, name: "Lower Body Power & Core", weekday: 0,
       exercises: [
         { name: "Barbell Back Squat (or Hack Squat)", sets: 4, repsLabel: "6–8 reps", rest: 180 },
         { name: "Romanian Deadlift Barbell", sets: 3, repsLabel: "8–10 reps", rest: 120 },
@@ -337,7 +450,7 @@
       ]
     },
     {
-      id: 2, name: "Upper Body Strength & V-Taper", weekday: 1, weekdayName: "Monday",
+      id: 2, name: "Upper Body Strength & V-Taper", weekday: 1,
       exercises: [
         { name: "Lat Pulldowns", sets: 4, repsLabel: "6–8 reps", rest: 180 },
         { name: "Incline Dumbbell Bench Press", sets: 4, repsLabel: "8–10 reps", rest: 120 },
@@ -347,7 +460,7 @@
       ]
     },
     {
-      id: 3, name: "Upper Body Hypertrophy & Arms", weekday: 3, weekdayName: "Wednesday",
+      id: 3, name: "Upper Body Hypertrophy & Arms", weekday: 3,
       exercises: [
         { name: "Flat Dumbbell Bench Press", sets: 3, repsLabel: "10–12 reps", rest: 90 },
         { name: "Single-Arm Dumbbell Row", sets: 3, repsLabel: "10–12 reps per arm", rest: 90 },
@@ -358,7 +471,7 @@
       ]
     },
     {
-      id: 4, name: "Lower Body Endurance & Conditioning", weekday: 6, weekdayName: "Saturday",
+      id: 4, name: "Lower Body Endurance & Conditioning", weekday: 6,
       exercises: [
         { name: "Bulgarian Split Squats", sets: 3, repsLabel: "8–10 reps per leg", rest: 90 },
         { name: "Seated or Lying Leg Curls", sets: 3, repsLabel: "12–15 reps", rest: 60 },
@@ -385,7 +498,7 @@
     const val = document.getElementById('username-input').value.trim();
     if (!val) return;
     localStorage.setItem('gymUsername', val);
-    loadMainScreen();
+    loadHomeScreen();
   }
 
   function resetUser() {
@@ -394,12 +507,49 @@
     showScreen('screen-login');
   }
 
-  function loadMainScreen() {
+  function loadHomeScreen() {
     const name = localStorage.getItem('gymUsername');
-    document.getElementById('greeting').innerHTML = `Hello, ${name}<span class="accent">!</span>`;
+    document.getElementById('home-greeting').innerHTML = `Hello, ${name}<span class="accent">!</span>`;
+    showScreen('screen-home');
+  }
 
+  // ---- Custom schedule (per-user weekday mapping) ----
+  function getSchedule() {
+    const saved = JSON.parse(localStorage.getItem('gymSchedule') || '{}');
+    const map = {};
+    WORKOUT_DAYS.forEach(d => { map[d.id] = (saved[d.id] !== undefined) ? saved[d.id] : d.weekday; });
+    return map;
+  }
+
+  function setScheduleDay(dayId, weekday) {
+    const saved = JSON.parse(localStorage.getItem('gymSchedule') || '{}');
+    saved[dayId] = Number(weekday);
+    localStorage.setItem('gymSchedule', JSON.stringify(saved));
+  }
+
+  function openSettings() {
+    const schedule = getSchedule();
+    const list = document.getElementById('settings-list');
+    list.innerHTML = '';
+    WORKOUT_DAYS.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'setting-row';
+      const sel = WEEKDAY_NAMES.map((wd, i) =>
+        `<option value="${i}" ${schedule[d.id] === i ? 'selected' : ''}>${wd}</option>`
+      ).join('');
+      row.innerHTML = `
+        <div class="srow-name">Day ${d.id} — ${d.name}</div>
+        <select onchange="setScheduleDay(${d.id}, this.value)">${sel}</select>
+      `;
+      list.appendChild(row);
+    });
+    showScreen('screen-settings');
+  }
+
+  function loadMainScreen() {
+    const schedule = getSchedule();
     const today = new Date().getDay();
-    const recommendedDay = WORKOUT_DAYS.find(d => d.weekday === today);
+    const recommendedDay = WORKOUT_DAYS.find(d => schedule[d.id] === today);
     const banner = document.getElementById('recommend-banner');
     const value = document.getElementById('recommend-value');
 
@@ -415,13 +565,11 @@
     list.innerHTML = '';
     WORKOUT_DAYS.forEach(d => {
       const btn = document.createElement('button');
-      btn.className = 'day-btn' + (d.weekday === today ? ' today' : '');
-      btn.innerHTML = `Day ${d.id} — ${d.name}<span class="weekday">Usually ${d.weekdayName}</span>`;
+      btn.className = 'day-btn' + (schedule[d.id] === today ? ' today' : '');
+      btn.innerHTML = `Day ${d.id} — ${d.name}<span class="weekday">Usually ${WEEKDAY_NAMES[schedule[d.id]]}</span>`;
       btn.onclick = () => openDay(d);
       list.appendChild(btn);
     });
-
-    showScreen('screen-main');
   }
 
   // ---- Workout flow state ----
@@ -432,9 +580,20 @@
   let restTimeoutId = null;
   let restEndTime = null;
   let restFinished = false;
+  let sessionLog = [];
+  let wakeLock = null;
 
-  function weightKey(day, ex) {
-    return `gymWeight_${day.id}_${ex.name}`;
+  function weightKey(day, ex) { return `gymWeight_${day.id}_${ex.name}`; }
+
+  async function requestWakeLockSafe() {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+      }
+    } catch (e) { /* not supported / denied, ignore */ }
+  }
+  function releaseWakeLock() {
+    if (wakeLock) { try { wakeLock.release(); } catch (e) {} wakeLock = null; }
   }
 
   function lookHowTo() {
@@ -446,7 +605,51 @@
   function openDay(d) {
     activeDay = d;
     exIndex = 0;
+    sessionLog = [];
+    requestWakeLockSafe();
     showExerciseOverview();
+  }
+
+  // ---- History storage ----
+  function getHistory() {
+    return JSON.parse(localStorage.getItem('gymHistory') || '[]');
+  }
+  function getBestWeight(exerciseName) {
+    const history = getHistory();
+    let best = null;
+    history.forEach(session => {
+      session.entries.forEach(e => {
+        if (e.exercise === exerciseName) {
+          const w = parseFloat(e.weight);
+          if (!isNaN(w) && (best === null || w > best)) best = w;
+        }
+      });
+    });
+    return best;
+  }
+  function saveSessionToHistory() {
+    if (sessionLog.length === 0) return;
+    const history = getHistory();
+    history.push({
+      date: new Date().toISOString().slice(0, 10),
+      dayId: activeDay.id,
+      dayName: activeDay.name,
+      entries: sessionLog,
+    });
+    localStorage.setItem('gymHistory', JSON.stringify(history));
+  }
+
+  function checkPrLive() {
+    const ex = activeDay.exercises[exIndex];
+    if (ex.isAmrap) return;
+    const val = parseFloat(document.getElementById('ex-weight').value);
+    const best = getBestWeight(ex.name);
+    const badge = document.getElementById('pr-badge');
+    if (!isNaN(val) && best !== null && val > best) {
+      badge.classList.add('show');
+    } else {
+      badge.classList.remove('show');
+    }
   }
 
   function showExerciseOverview() {
@@ -464,13 +667,23 @@
     }
 
     const weightInput = document.getElementById('ex-weight');
+    const weightLabel = weightInput.previousElementSibling;
+    const prBest = document.getElementById('pr-best');
+    const prBadge = document.getElementById('pr-badge');
+    prBadge.classList.remove('show');
+
     if (ex.isAmrap) {
       weightInput.style.display = 'none';
-      weightInput.previousElementSibling.style.display = 'none';
+      weightLabel.style.display = 'none';
+      prBest.style.display = 'none';
     } else {
       weightInput.style.display = '';
-      weightInput.previousElementSibling.style.display = '';
+      weightLabel.style.display = '';
+      prBest.style.display = '';
       weightInput.value = localStorage.getItem(weightKey(activeDay, ex)) || '';
+      const best = getBestWeight(ex.name);
+      prBest.textContent = best !== null ? `Previous best: ${best} kg` : `No weight logged yet for this one`;
+      checkPrLive();
     }
 
     showScreen('screen-exercise');
@@ -484,17 +697,20 @@
 
   function startExercise() {
     requestNotifPermission();
+    requestWakeLockSafe();
     const ex = activeDay.exercises[exIndex];
     if (!ex.isAmrap) {
       const w = document.getElementById('ex-weight').value;
-      if (w) localStorage.setItem(weightKey(activeDay, ex), w);
+      if (w) {
+        localStorage.setItem(weightKey(activeDay, ex), w);
+        sessionLog.push({ exercise: ex.name, weight: w });
+      }
     }
 
     if (ex.isAmrap) {
       beginRest(ex.duration, true);
       return;
     }
-
     showActiveSet();
   }
 
@@ -588,23 +804,17 @@
     } catch (e) { /* audio not available, ignore */ }
 
     if ('Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification("Rest's up! 🔥", { body: "Time for your next set." });
-      } catch (e) { /* notification not available, ignore */ }
+      try { new Notification("Rest's up! 🔥", { body: "Time for your next set." }); } catch (e) {}
     }
   }
 
-  // Recompute instantly whenever the tab comes back into view, so a
-  // throttled background interval can't leave the display stale.
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && restEndTime && !restFinished) {
       updateTimerFromEndTime();
     }
   });
 
-  function skipRest() {
-    onRestFinished();
-  }
+  function skipRest() { onRestFinished(); }
 
   function afterRest() {
     const ex = activeDay.exercises[exIndex];
@@ -619,8 +829,12 @@
   }
 
   function goToNextExercise() {
+    clearInterval(restTimerInterval);
+    clearTimeout(restTimeoutId);
     exIndex++;
     if (exIndex >= activeDay.exercises.length) {
+      saveSessionToHistory();
+      releaseWakeLock();
       document.getElementById('complete-sub').textContent =
         `Day ${activeDay.id} — ${activeDay.name} complete. Nice work.`;
       showScreen('screen-complete');
@@ -629,11 +843,111 @@
     }
   }
 
+  // ---- Workout history / graph screen ----
+  let historyChartInstance = null;
+
+  function allExerciseNames() {
+    const names = [];
+    WORKOUT_DAYS.forEach(d => d.exercises.forEach(e => {
+      if (!e.isAmrap && !names.includes(e.name)) names.push(e.name);
+    }));
+    return names;
+  }
+
+  function openHistory() {
+    const history = getHistory();
+    const select = document.getElementById('history-exercise-select');
+    select.innerHTML = '';
+    allExerciseNames().forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+
+    // default to the most recently logged exercise, if any
+    if (history.length > 0) {
+      const last = history[history.length - 1];
+      if (last.entries.length > 0) select.value = last.entries[last.entries.length - 1].exercise;
+    }
+
+    renderHistoryChart();
+    renderSessionList(history);
+    showScreen('screen-history');
+  }
+
+  function renderHistoryChart() {
+    const exerciseName = document.getElementById('history-exercise-select').value;
+    const history = getHistory();
+    const points = [];
+    history.forEach(session => {
+      const match = session.entries.find(e => e.exercise === exerciseName);
+      if (match) points.push({ date: session.date, weight: parseFloat(match.weight) });
+    });
+
+    const emptyNote = document.getElementById('history-empty');
+    const canvas = document.getElementById('history-chart');
+
+    if (points.length === 0) {
+      emptyNote.style.display = 'block';
+      canvas.style.display = 'none';
+      if (historyChartInstance) { historyChartInstance.destroy(); historyChartInstance = null; }
+      return;
+    }
+    emptyNote.style.display = 'none';
+    canvas.style.display = 'block';
+
+    if (historyChartInstance) historyChartInstance.destroy();
+    historyChartInstance = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: points.map(p => p.date),
+        datasets: [{
+          label: exerciseName + ' (kg)',
+          data: points.map(p => p.weight),
+          borderColor: '#ff4b2b',
+          backgroundColor: 'rgba(255,75,43,0.2)',
+          tension: 0.25,
+          pointRadius: 4,
+          pointBackgroundColor: '#ffd54a',
+          fill: true,
+        }]
+      },
+      options: {
+        plugins: { legend: { labels: { color: '#f5f5f5' } } },
+        scales: {
+          x: { ticks: { color: '#9a9aa0' }, grid: { color: '#2a2a2e' } },
+          y: { ticks: { color: '#9a9aa0' }, grid: { color: '#2a2a2e' } },
+        }
+      }
+    });
+  }
+
+  function renderSessionList(history) {
+    const list = document.getElementById('session-list');
+    list.innerHTML = '';
+    if (history.length === 0) {
+      list.innerHTML = '<div class="empty-note">No workouts logged yet — finish one and it\'ll show up here.</div>';
+      return;
+    }
+    history.slice().reverse().forEach(session => {
+      const div = document.createElement('div');
+      div.className = 'session-item';
+      const entriesText = session.entries.map(e => `${e.exercise}: ${e.weight}kg`).join(' · ');
+      div.innerHTML = `
+        <div class="sdate">${session.date}</div>
+        <div class="sday">Day ${session.dayId} — ${session.dayName}</div>
+        <div class="sentry">${entriesText}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
   // init
   (function init() {
     const saved = localStorage.getItem('gymUsername');
     if (saved) {
-      loadMainScreen();
+      loadHomeScreen();
     } else {
       showScreen('screen-login');
     }
