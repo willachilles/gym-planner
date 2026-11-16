@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gym Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --bg-stripe: #141416;
+    --card: #1b1b1f;
+    --accent: #ff4b2b;
+    --accent-dark: #7a2314;
+    --accent-glow: #ff7a52;
+    --text: #f5f5f5;
+    --text-dim: #9a9aa0;
+    --rest: #ffb648;
+    --steel: #3a3a40;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: repeating-linear-gradient(135deg, var(--bg) 0px, var(--bg) 40px, var(--bg-stripe) 40px, var(--bg-stripe) 80px);
+    color: var(--text);
+    font-family: 'Oswald', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height: 100%;
+  }
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    text-align: center;
+  }
+  .screen.active { display: flex; }
+
+  h1 {
+    font-family: 'Bebas Neue', 'Oswald', sans-serif;
+    font-size: 40px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    color: var(--text);
+  }
+  h1 .accent { color: var(--accent); }
+
+  p.sub {
+    color: var(--text-dim);
+    font-size: 16px;
+    margin: 0 0 28px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    max-width: 320px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--steel);
+    background: var(--card);
+    color: var(--text);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  button {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
+
+  button.secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 2px solid var(--steel);
+    box-shadow: none;
+  }
+  button.secondary:active { transform: scale(0.97); }
+
+  button.howto {
+    background: var(--card);
+    color: var(--rest);
+    border: 2px solid var(--rest);
+    box-shadow: none;
+  }
+
+  .recommend-banner {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 18px 20px;
+    width: 100%;
+    max-width: 340px;
+    margin-bottom: 24px;
+    box-shadow: 0 0 20px rgba(255, 75, 43, 0.15);
+  }
+  .recommend-banner.rest { border-color: var(--rest); box-shadow: 0 0 20px rgba(255, 182, 72, 0.15); }
+  .recommend-banner .label {
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .recommend-banner .value { font-size: 20px; font-weight: 700; }
+
+  .day-list { width: 100%; max-width: 320px; }
+  .day-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 2px solid var(--steel);
+    color: var(--text);
+    margin-bottom: 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    box-shadow: none;
+  }
+  .day-btn .weekday {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+  .day-btn.today { border-color: var(--accent); background: linear-gradient(135deg, rgba(255,75,43,0.18), var(--card)); }
+
+  .back-link {
+    margin-top: 10px;
+    color: var(--text-dim);
+    font-size: 15px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .progress-tag {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .exercise-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .exercise-meta {
+    font-size: 17px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  label.weight-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .set-tag {
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .instruction {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+
+  .timer {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-label {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+  }
+  .timer-ring {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 6px solid var(--steel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 30px;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .timer-ring.done {
+    border-color: var(--accent);
+    background: radial-gradient(circle, rgba(255,75,43,0.25), transparent);
+  }
+  @keyframes blink-bg {
+    0%, 100% { border-color: var(--steel); }
+    50% { border-color: var(--accent); background: rgba(255,75,43,0.25); }
+  }
+  .timer-ring.blinking { animation: blink-bg 0.6s ease-in-out 5; }
+
+  .complete-emoji { font-size: 56px; margin-bottom: 10px; }
+
+  .notif-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    max-width: 300px;
+    margin-top: -4px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Screen 1: ask for username -->
+  <div class="screen active" id="screen-login">
+    <h1>Hey There <span class="accent">👋</span></h1>
+    <p class="sub">What should I call you?</p>
+    <input type="text" id="username-input" placeholder="Your name" maxlength="20">
+    <button onclick="saveUsername()">Continue</button>
+  </div>
+
+  <!-- Screen 2: main / day picker -->
+  <div class="screen" id="screen-main">
+    <h1 id="greeting">Hello<span class="accent">!</span></h1>
+    <p class="sub">What are we working on today?</p>
+
+    <div class="recommend-banner" id="recommend-banner">
+      <div class="label">Recommended for today</div>
+      <div class="value" id="recommend-value">—</div>
+    </div>
+
+    <div class="day-list" id="day-list"></div>
+
+    <div class="back-link" onclick="resetUser()">Not you? Change name</div>
+  </div>
+
+  <!-- Screen 3: exercise overview -->
+  <div class="screen" id="screen-exercise">
+    <div class="progress-tag" id="ex-progress">Exercise 1 of 5</div>
+    <div class="exercise-name" id="ex-name">Exercise</div>
+    <div class="exercise-meta" id="ex-meta">4 sets of 6–8 reps</div>
+
+    <label class="weight-label" for="ex-weight">Weight (kg) — leave blank if bodyweight</label>
+    <input type="number" id="ex-weight" placeholder="e.g. 60" inputmode="decimal">
+
+    <button onclick="startExercise()">Start</button>
+    <button class="howto" onclick="lookHowTo()">❓ I don't know how to do this</button>
+    <div class="back-link" onclick="showScreen('screen-main')">← Back to day picker</div>
+  </div>
+
+  <!-- Screen 4: active set -->
+  <div class="screen" id="screen-active">
+    <div class="set-tag" id="active-settag">Set 1 of 4</div>
+    <div class="instruction" id="active-instruction">Do 6–8 reps</div>
+    <div class="exercise-meta" id="active-weight"></div>
+    <button onclick="finishSet()">Done with this set</button>
+    <button class="howto" onclick="lookHowTo()">❓ I don't know how to do this</button>
+  </div>
+
+  <!-- Screen 5: resting -->
+  <div class="screen" id="screen-resting">
+    <div class="timer-label">Rest</div>
+    <div class="timer-ring" id="timer-ring">
+      <div class="timer" id="timer-display">2:00</div>
+    </div>
+    <div class="notif-note" id="notif-note"></div>
+    <button class="secondary" onclick="skipRest()">Skip rest</button>
+    <button id="rest-next-btn" style="display:none" onclick="afterRest()">Next</button>
+  </div>
+
+  <!-- Screen 6: day complete -->
+  <div class="screen" id="screen-complete">
+    <div class="complete-emoji">🔥💪</div>
+    <h1>Workout <span class="accent">Done!</span></h1>
+    <p class="sub" id="complete-sub">Nice work.</p>
+    <button onclick="showScreen('screen-main')">Back to day picker</button>
+  </div>
+
+<script>
+  // Sunday = 0 ... Saturday = 6
+  const WORKOUT_DAYS = [
+    {
+      id: 1, name: "Lower Body Power & Core", weekday: 0, weekdayName: "Sunday",
+      exercises: [
+        { name: "Barbell Back Squat (or Hack Squat)", sets: 4, repsLabel: "6–8 reps", rest: 180 },
+        { name: "Romanian Deadlift Barbell", sets: 3, repsLabel: "8–10 reps", rest: 120 },
+        { name: "Walking Dumbbell Lunges", sets: 3, repsLabel: "10 reps per leg", rest: 90 },
+        { name: "Hanging Leg Raises", sets: 3, repsLabel: "12–15 reps", rest: 60 },
+        { name: "Plank Hold", sets: 3, repsLabel: "60 sec hold", rest: 60, isHold: true },
+      ]
+    },
+    {
+      id: 2, name: "Upper Body Strength & V-Taper", weekday: 1, weekdayName: "Monday",
+      exercises: [
+        { name: "Lat Pulldowns", sets: 4, repsLabel: "6–8 reps", rest: 180 },
+        { name: "Incline Dumbbell Bench Press", sets: 4, repsLabel: "8–10 reps", rest: 120 },
+        { name: "Chest-Supported T-Bar Row", sets: 3, repsLabel: "8–10 reps", rest: 120 },
+        { name: "Seated Dumbbell Overhead Press", sets: 3, repsLabel: "8–10 reps", rest: 120 },
+        { name: "Cable Lateral Raises", sets: 4, repsLabel: "12–15 reps", rest: 90 },
+      ]
+    },
+    {
+      id: 3, name: "Upper Body Hypertrophy & Arms", weekday: 3, weekdayName: "Wednesday",
+      exercises: [
+        { name: "Flat Dumbbell Bench Press", sets: 3, repsLabel: "10–12 reps", rest: 90 },
+        { name: "Single-Arm Dumbbell Row", sets: 3, repsLabel: "10–12 reps per arm", rest: 90 },
+        { name: "Dumbbell Lateral Raises", sets: 4, repsLabel: "15–20 reps", rest: 60 },
+        { name: "Incline Dumbbell Bicep Curls", sets: 3, repsLabel: "10–12 reps", rest: 60 },
+        { name: "Cable Tricep Rope Pushdowns", sets: 3, repsLabel: "12–15 reps", rest: 60 },
+        { name: "Face Pulls", sets: 3, repsLabel: "15–20 reps", rest: 60 },
+      ]
+    },
+    {
+      id: 4, name: "Lower Body Endurance & Conditioning", weekday: 6, weekdayName: "Saturday",
+      exercises: [
+        { name: "Bulgarian Split Squats", sets: 3, repsLabel: "8–10 reps per leg", rest: 90 },
+        { name: "Seated or Lying Leg Curls", sets: 3, repsLabel: "12–15 reps", rest: 60 },
+        { name: "Standing Calf Raises", sets: 4, repsLabel: "12–15 reps", rest: 60 },
+        { name: "Finisher AMRAP (5 Pull-ups, 10 Push-ups, 15 Air Squats)", isAmrap: true, duration: 1200 },
+      ]
+    },
+  ];
+
+  const REST_DAYS = {
+    2: "Rest day — basketball training",
+    4: "Rest day",
+    5: "Rest day — basketball game",
+  };
+
+  const WEEKDAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function saveUsername() {
+    const val = document.getElementById('username-input').value.trim();
+    if (!val) return;
+    localStorage.setItem('gymUsername', val);
+    loadMainScreen();
+  }
+
+  function resetUser() {
+    localStorage.removeItem('gymUsername');
+    document.getElementById('username-input').value = '';
+    showScreen('screen-login');
+  }
+
+  function loadMainScreen() {
+    const name = localStorage.getItem('gymUsername');
+    document.getElementById('greeting').innerHTML = `Hello, ${name}<span class="accent">!</span>`;
+
+    const today = new Date().getDay();
+    const recommendedDay = WORKOUT_DAYS.find(d => d.weekday === today);
+    const banner = document.getElementById('recommend-banner');
+    const value = document.getElementById('recommend-value');
+
+    if (recommendedDay) {
+      banner.classList.remove('rest');
+      value.textContent = `Day ${recommendedDay.id} — ${recommendedDay.name}`;
+    } else {
+      banner.classList.add('rest');
+      value.textContent = REST_DAYS[today] || "Rest day";
+    }
+
+    const list = document.getElementById('day-list');
+    list.innerHTML = '';
+    WORKOUT_DAYS.forEach(d => {
+      const btn = document.createElement('button');
+      btn.className = 'day-btn' + (d.weekday === today ? ' today' : '');
+      btn.innerHTML = `Day ${d.id} — ${d.name}<span class="weekday">Usually ${d.weekdayName}</span>`;
+      btn.onclick = () => openDay(d);
+      list.appendChild(btn);
+    });
+
+    showScreen('screen-main');
+  }
+
+  // ---- Workout flow state ----
+  let activeDay = null;
+  let exIndex = 0;
+  let setNum = 1;
+  let restTimerInterval = null;
+  let restTimeoutId = null;
+  let restEndTime = null;
+  let restFinished = false;
+
+  function weightKey(day, ex) {
+    return `gymWeight_${day.id}_${ex.name}`;
+  }
+
+  function lookHowTo() {
+    const ex = activeDay.exercises[exIndex];
+    const q = encodeURIComponent(ex.name.replace(/\(.*?\)/g, '') + ' exercise proper form');
+    window.open(`https://www.google.com/search?tbm=isch&q=${q}`, '_blank');
+  }
+
+  function openDay(d) {
+    activeDay = d;
+    exIndex = 0;
+    showExerciseOverview();
+  }
+
+  function showExerciseOverview() {
+    const ex = activeDay.exercises[exIndex];
+    setNum = 1;
+
+    document.getElementById('ex-progress').textContent =
+      `Exercise ${exIndex + 1} of ${activeDay.exercises.length}`;
+    document.getElementById('ex-name').textContent = ex.name;
+
+    if (ex.isAmrap) {
+      document.getElementById('ex-meta').textContent = `AMRAP — 15–20 min, repeat the round`;
+    } else {
+      document.getElementById('ex-meta').textContent = `${ex.sets} sets of ${ex.repsLabel}`;
+    }
+
+    const weightInput = document.getElementById('ex-weight');
+    if (ex.isAmrap) {
+      weightInput.style.display = 'none';
+      weightInput.previousElementSibling.style.display = 'none';
+    } else {
+      weightInput.style.display = '';
+      weightInput.previousElementSibling.style.display = '';
+      weightInput.value = localStorage.getItem(weightKey(activeDay, ex)) || '';
+    }
+
+    showScreen('screen-exercise');
+  }
+
+  function requestNotifPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+
+  function startExercise() {
+    requestNotifPermission();
+    const ex = activeDay.exercises[exIndex];
+    if (!ex.isAmrap) {
+      const w = document.getElementById('ex-weight').value;
+      if (w) localStorage.setItem(weightKey(activeDay, ex), w);
+    }
+
+    if (ex.isAmrap) {
+      beginRest(ex.duration, true);
+      return;
+    }
+
+    showActiveSet();
+  }
+
+  function showActiveSet() {
+    const ex = activeDay.exercises[exIndex];
+    document.getElementById('active-settag').textContent = `Set ${setNum} of ${ex.sets}`;
+    document.getElementById('active-instruction').textContent =
+      ex.isHold ? `Hold — ${ex.repsLabel}` : `Do ${ex.repsLabel}`;
+
+    const w = localStorage.getItem(weightKey(activeDay, ex));
+    document.getElementById('active-weight').textContent = w ? `Weight: ${w} kg` : '';
+
+    showScreen('screen-active');
+  }
+
+  function finishSet() {
+    const ex = activeDay.exercises[exIndex];
+    const isLastSet = setNum >= ex.sets;
+    beginRest(ex.rest, isLastSet);
+  }
+
+  function beginRest(seconds, isLastOfExercise) {
+    restEndTime = Date.now() + seconds * 1000;
+    restFinished = false;
+
+    const ring = document.getElementById('timer-ring');
+    const display = document.getElementById('timer-display');
+    const nextBtn = document.getElementById('rest-next-btn');
+    const note = document.getElementById('notif-note');
+    ring.classList.remove('done', 'blinking');
+    nextBtn.style.display = 'none';
+    nextBtn.dataset.lastOfExercise = isLastOfExercise ? '1' : '0';
+
+    if ('Notification' in window && Notification.permission === 'denied') {
+      note.textContent = "Notifications blocked — keep this tab open to catch the buzzer.";
+    } else if ('Notification' in window && Notification.permission === 'granted') {
+      note.textContent = "You'll get a notification when rest is up.";
+    } else {
+      note.textContent = "";
+    }
+
+    updateTimerFromEndTime();
+    showScreen('screen-resting');
+
+    clearInterval(restTimerInterval);
+    clearTimeout(restTimeoutId);
+    restTimerInterval = setInterval(updateTimerFromEndTime, 250);
+    restTimeoutId = setTimeout(onRestFinished, seconds * 1000 + 50);
+  }
+
+  function updateTimerFromEndTime() {
+    const display = document.getElementById('timer-display');
+    const remainingMs = restEndTime - Date.now();
+    if (remainingMs <= 0) {
+      updateTimerDisplay(display, 0);
+      if (!restFinished) onRestFinished();
+      return;
+    }
+    updateTimerDisplay(display, Math.ceil(remainingMs / 1000));
+  }
+
+  function updateTimerDisplay(display, remaining) {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    display.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function onRestFinished() {
+    if (restFinished) return;
+    restFinished = true;
+    clearInterval(restTimerInterval);
+    clearTimeout(restTimeoutId);
+
+    const ring = document.getElementById('timer-ring');
+    const nextBtn = document.getElementById('rest-next-btn');
+    ring.classList.add('done', 'blinking');
+    nextBtn.style.display = 'block';
+    document.getElementById('timer-display').textContent = "Go!";
+
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.value = 0.15;
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    } catch (e) { /* audio not available, ignore */ }
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification("Rest's up! 🔥", { body: "Time for your next set." });
+      } catch (e) { /* notification not available, ignore */ }
+    }
+  }
+
+  // Recompute instantly whenever the tab comes back into view, so a
+  // throttled background interval can't leave the display stale.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && restEndTime && !restFinished) {
+      updateTimerFromEndTime();
+    }
+  });
+
+  function skipRest() {
+    onRestFinished();
+  }
+
+  function afterRest() {
+    const ex = activeDay.exercises[exIndex];
+    const wasLast = document.getElementById('rest-next-btn').dataset.lastOfExercise === '1';
+
+    if (ex.isAmrap || wasLast) {
+      goToNextExercise();
+    } else {
+      setNum++;
+      showActiveSet();
+    }
+  }
+
+  function goToNextExercise() {
+    exIndex++;
+    if (exIndex >= activeDay.exercises.length) {
+      document.getElementById('complete-sub').textContent =
+        `Day ${activeDay.id} — ${activeDay.name} complete. Nice work.`;
+      showScreen('screen-complete');
+    } else {
+      showExerciseOverview();
+    }
+  }
+
+  // init
+  (function init() {
+    const saved = localStorage.getItem('gymUsername');
+    if (saved) {
+      loadMainScreen();
+    } else {
+      showScreen('screen-login');
+    }
+  })();
+</script>
+
+</body>
+</html>
